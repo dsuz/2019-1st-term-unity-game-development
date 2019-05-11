@@ -30,4 +30,17 @@ public class TargetBlockController : MonoBehaviour
             Destroy(this.gameObject);
         }
     }
+
+    /// <summary>
+    /// 「トリガーモードの」Collider に衝突判定があった時に呼ばれる
+    /// </summary>
+    /// <param name="collision">衝突の情報</param>
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        // 衝突相手がボールだったら自分自身を破棄する
+        if (collision.gameObject.tag == "BallTag")
+        {
+            Destroy(this.gameObject);
+        }
+    }
 }
