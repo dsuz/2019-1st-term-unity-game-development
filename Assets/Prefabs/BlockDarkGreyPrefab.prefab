@@ -23,7 +23,7 @@ GameObject:
   - component: {fileID: 114025068612217882}
   - component: {fileID: 61536082581773604}
   m_Layer: 0
-  m_Name: BlockDarkGrey
+  m_Name: BlockDarkGreyPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
