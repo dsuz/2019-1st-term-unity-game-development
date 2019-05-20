@@ -8,6 +8,8 @@ using UnityEngine;
 /// </summary>
 public class TargetBlockController : MonoBehaviour
 {
+    public int Score = 100;
+
     void Start()
     {
 

@@ -13,6 +13,7 @@ public class BallController : MonoBehaviour
     [SerializeField] Vector2 m_powerDirection = Vector2.up + Vector2.right;
     /// <summary>ボールを最初に動かす力の大きさ</summary>
     [SerializeField] float m_powerScale = 5f;
+    [SerializeField] GameManager m_gameManager;
     Rigidbody2D m_rb2d;
 
     void Start()
@@ -32,5 +33,14 @@ public class BallController : MonoBehaviour
     public void Push()
     {
         m_rb2d.AddForce(m_powerDirection.normalized * m_powerScale, ForceMode2D.Impulse);
+    }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        TargetBlockController target = collision.gameObject.GetComponent<TargetBlockController>();
+        if (target)
+        {
+            m_gameManager.AddScore(target.Score);
+        }
     }
 }
