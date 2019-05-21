@@ -8,6 +8,7 @@ using UnityEngine;
 /// </summary>
 public class TargetBlockController : MonoBehaviour
 {
+    /// <summary>ブロックを壊した時に入る点数</summary>
     public int Score = 100;
 
     void Start()

@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - BallTag
+  - KillzoneTag
   layers:
   - Default
   - TransparentFX
