@@ -27,7 +27,8 @@ public class TargetBlockController : MonoBehaviour
     /// <param name="collision">衝突の情報</param>
     void OnCollisionEnter2D(Collision2D collision)
     {
-        Debug.Log("Enter OnCollisionEnter2D."); // 関数が呼び出されたら Console にログを出力する
+        // このログはもう不要なので無効にする
+        // Debug.Log("Enter OnCollisionEnter2D."); // 関数が呼び出されたら Console にログを出力する
 
         // 衝突相手がボールだったら自分自身を破棄する
         if (collision.gameObject.tag == "BallTag")
