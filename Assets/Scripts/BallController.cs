@@ -7,7 +7,7 @@ using UnityEngine.UI;   // UI を使うために必要になる
 /// ボールを制御するクラス
 /// ボールのオブジェクトに追加して使う
 /// </summary>
-[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Rigidbody2D), typeof(AudioSource))]
 public class BallController : MonoBehaviour
 {
     /// <summary>ボールが最初に動く方向</summary>
@@ -23,6 +23,9 @@ public class BallController : MonoBehaviour
     [SerializeField] Text m_messageText;
     /// <summary>ゲームスタートボタン</summary>
     [SerializeField] Button m_startButton;
+    /// <summary>ボールが衝突した時の SFX</summary>
+    [SerializeField] AudioClip m_sfx;
+    AudioSource m_audioSource;
 
     void Start()
     {
@@ -32,6 +35,8 @@ public class BallController : MonoBehaviour
         {
             Push();
         }
+
+        m_audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -70,6 +75,21 @@ public class BallController : MonoBehaviour
         }
 
         // Killzone にぶつかったらゲームオーバー
+        /* === Killzone が Collider だと、ゲームオーバー時に音が鳴ってしまうのでここで処理するのはやめる
+        if (collision.gameObject.tag == "KillzoneTag")
+        {
+            GameOver();
+        }
+        */
+
+        // 音を鳴らす
+        m_audioSource.PlayOneShot(m_sfx);
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        // Killzone が Collider だと音が鳴ってしまうのでここで処理する
+        // Killzone の Collider の設定をトリガーモードにしておくこと
         if (collision.gameObject.tag == "KillzoneTag")
         {
             GameOver();
