@@ -30,13 +30,13 @@ public class BallController : MonoBehaviour
     void Start()
     {
         m_rb2d = GetComponent<Rigidbody2D>();
+        m_audioSource = GetComponent<AudioSource>();
+
         // m_startButton が設定されていない時はボールを押す
         if (m_startButton == null)
         {
             Push();
         }
-
-        m_audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -75,24 +75,15 @@ public class BallController : MonoBehaviour
         }
 
         // Killzone にぶつかったらゲームオーバー
-        /* === Killzone が Collider だと、ゲームオーバー時に音が鳴ってしまうのでここで処理するのはやめる
         if (collision.gameObject.tag == "KillzoneTag")
         {
             GameOver();
         }
-        */
 
         // 音を鳴らす
-        m_audioSource.PlayOneShot(m_sfx);
-    }
-
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        // Killzone が Collider だと音が鳴ってしまうのでここで処理する
-        // Killzone の Collider の設定をトリガーモードにしておくこと
-        if (collision.gameObject.tag == "KillzoneTag")
+        if (m_audioSource)
         {
-            GameOver();
+            m_audioSource.PlayOneShot(m_sfx);
         }
     }
 
