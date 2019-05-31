@@ -25,6 +25,10 @@ public class BallController : MonoBehaviour
     [SerializeField] Button m_startButton;
     /// <summary>ボールが衝突した時の SFX</summary>
     [SerializeField] AudioClip m_sfx;
+    /// <summary>ゲームオーバー時の SFX</summary>
+    [SerializeField] AudioClip m_gameoverSfx;
+    /// <summary>ゲームクリアー時の SFX</summary>
+    [SerializeField] AudioClip m_gameClearSfx;
     AudioSource m_audioSource;
 
     void Start()
@@ -62,7 +66,7 @@ public class BallController : MonoBehaviour
     }
 
     /// <summary>
-    /// 衝突判定をする
+    /// 衝突判定をする（コライダーモード）
     /// </summary>
     /// <param name="collision"></param>
     void OnCollisionEnter2D(Collision2D collision)
@@ -74,16 +78,23 @@ public class BallController : MonoBehaviour
             AddScore(target.Score);   // スコアを加算する
         }
 
-        // Killzone にぶつかったらゲームオーバー
-        if (collision.gameObject.tag == "KillzoneTag")
-        {
-            GameOver();
-        }
-
         // 音を鳴らす
         if (m_audioSource)
         {
             m_audioSource.PlayOneShot(m_sfx);
+        }
+    }
+
+    /// <summary>
+    /// 衝突判定をする（トリガーモード）
+    /// </summary>
+    /// <param name="collision"></param>
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        // Killzone にぶつかったらゲームオーバー
+        if (collision.gameObject.tag == "KillzoneTag")
+        {
+            GameOver();
         }
     }
 
@@ -124,6 +135,12 @@ public class BallController : MonoBehaviour
         {
             m_messageText.text = "Game Over";
         }
+
+        // 音を鳴らす
+        if (m_audioSource)
+        {
+            m_audioSource.PlayOneShot(m_gameoverSfx);
+        }
     }
 
     /// <summary>
@@ -138,6 +155,12 @@ public class BallController : MonoBehaviour
         if (m_messageText)
         {
             m_messageText.text = "Clear!";
+        }
+
+        // 音を鳴らす
+        if (m_audioSource)
+        {
+            m_audioSource.PlayOneShot(m_gameClearSfx);
         }
     }
 }
