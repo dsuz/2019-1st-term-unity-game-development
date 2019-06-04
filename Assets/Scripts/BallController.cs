@@ -30,11 +30,29 @@ public class BallController : MonoBehaviour
     /// <summary>ゲームクリアー時の SFX</summary>
     [SerializeField] AudioClip m_gameClearSfx;
     AudioSource m_audioSource;
+    /// <summary>HitFactor 係数</summary>
+    [SerializeField] float m_hitFactorCoefficient = 2f;
+    /// <summary>ボールの最低速度</summary>
+    [SerializeField] float m_minSpeed = 4f;
+    /// <summary>ボールの最高速度</summary>
+    [SerializeField] float m_maxSpeed = 5f;
+    /// <summary>ゲームリスタートボタン</summary>
+    [SerializeField] Button m_restartButton;
+    /// <summary>ボールの初期位置</summary>
+    Vector2 m_initialPosition;
+    /// <summary>これ以上ボールの進行方向が水平になったら補正を入れるというリミット</summary>
+    [SerializeField] float m_horizontalLimit = 0.05f;
+    /// <summary>ボールに補正を補正を入れ時のベクトル</summary>
+    [SerializeField] Vector2 m_adjustVector = Vector3.down * 3f;
 
     void Start()
     {
+        // のちに操作するコンポーネントを保持しておく
         m_rb2d = GetComponent<Rigidbody2D>();
         m_audioSource = GetComponent<AudioSource>();
+
+        m_initialPosition = transform.position; // ボールの初期位置を記憶しておく
+        m_score = 0;    // 得点を初期化する
 
         // m_startButton が設定されていない時はボールを押す
         if (m_startButton == null)
@@ -55,14 +73,13 @@ public class BallController : MonoBehaviour
     {
         m_rb2d.AddForce(m_powerDirection.normalized * m_powerScale, ForceMode2D.Impulse);
 
-        // 得点をリセットする
-        m_score = 0;
-
         // m_startButton がある場合は、非表示にする
         if (m_startButton)
         {
             m_startButton.gameObject.SetActive(false);
         }
+
+        AdjustSpeed();  // 速度を調整する
     }
 
     /// <summary>
@@ -77,12 +94,31 @@ public class BallController : MonoBehaviour
         {
             AddScore(target.Score);   // スコアを加算する
         }
+        else if (collision.gameObject.tag == "Player")  // 衝突相手がパドルだったら
+        {
+            // パドルのどの位置に当たったかに応じて、ボールに力を加える
+            float hitFactor = HitFactor(transform.position, collision.transform.position, collision.collider.bounds.size.x);
+            Vector2 forceDirection = Vector2.right * hitFactor * m_hitFactorCoefficient;
+            m_rb2d.AddForce(forceDirection, ForceMode2D.Impulse);
+        }
 
         // 音を鳴らす
         if (m_audioSource)
         {
             m_audioSource.PlayOneShot(m_sfx);
         }
+    }
+
+    void OnCollisionExit2D(Collision2D collision)
+    {
+        // 水平にぶつかっていたら、下向きに力を加える（続行不可能状態の防止）
+        Vector2 v = m_rb2d.velocity.normalized;
+        if (Mathf.Abs(v.y) < m_horizontalLimit)
+        {
+            m_rb2d.AddForce(m_adjustVector, ForceMode2D.Impulse);
+        }
+
+        AdjustSpeed();  // ボールの速度を調整する
     }
 
     /// <summary>
@@ -141,6 +177,12 @@ public class BallController : MonoBehaviour
         {
             m_audioSource.PlayOneShot(m_gameoverSfx);
         }
+
+        // Restart ボタンを表示する
+        if (m_restartButton)
+        {
+            m_restartButton.gameObject.SetActive(true);
+        }
     }
 
     /// <summary>
@@ -162,5 +204,68 @@ public class BallController : MonoBehaviour
         {
             m_audioSource.PlayOneShot(m_gameClearSfx);
         }
+
+        // Restart ボタンを表示する
+        if (m_restartButton)
+        {
+            m_restartButton.gameObject.SetActive(true);
+        }
+    }
+
+    /// <summary>
+    /// パドルのどの位置に当たったのかを計算する。
+    /// 右端に当たったら 1、中央に当たったら 0、左端に当たったら 1 を返す。
+    /// </summary>
+    /// <param name="ballPosition"></param>
+    /// <param name="paddlePosition"></param>
+    /// <param name="paddleWidth"></param>
+    /// <returns></returns>
+    float HitFactor(Vector2 ballPosition, Vector2 paddlePosition, float paddleWidth)
+    {
+        float hitFactor = (ballPosition.x - paddlePosition.x) / paddleWidth;
+        return hitFactor;
+    }
+
+    /// <summary>
+    /// ボールの速度を調整する
+    /// </summary>
+    void AdjustSpeed()
+    {
+        Vector2 v = m_rb2d.velocity;
+
+        if (v.magnitude < m_minSpeed)
+        {
+            m_rb2d.velocity = m_rb2d.velocity.normalized * m_minSpeed;
+        }
+        else if (v.magnitude > m_maxSpeed)
+        {
+            m_rb2d.velocity = m_rb2d.velocity.normalized * m_maxSpeed;
+        }
+    }
+
+    /// <summary>
+    /// ゲームオーバー後にゲームをリセットする
+    /// </summary>
+    public void ResetGame()
+    {
+        m_score = 0;    // 得点をリセットする
+        AddScore(0);    // 得点表示をリセットする
+        transform.position = m_initialPosition; // ボールの位置をリセットする
+
+        // TargetBlock を全て消す
+        TargetBlockController[] targetBlocks = GameObject.FindObjectsOfType<TargetBlockController>();
+        foreach (TargetBlockController block in targetBlocks)
+        {
+            Destroy(block.gameObject);
+        }
+
+        // TargetBlock を再生成する
+        GameObject generatorObject = GameObject.Find("TargetBlockGenerator");
+        TargetBlockGenerator generator = generatorObject.GetComponent<TargetBlockGenerator>();
+        generator.GenerateBlocks();
+
+        m_messageText.gameObject.SetActive(false);  // メッセージを消す
+        m_restartButton.gameObject.SetActive(false);    // Restart ボタンを消す
+        m_startButton.gameObject.SetActive(true);   // Start ボタンを表示する
     }
 }

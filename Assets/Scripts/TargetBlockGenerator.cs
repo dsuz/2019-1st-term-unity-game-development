@@ -40,6 +40,7 @@ public class TargetBlockGenerator : MonoBehaviour
                 int prefabIndex = j % m_targetPrefabArray.Length;
                 GameObject go = Instantiate(m_targetPrefabArray[prefabIndex]);  // プレハブからオブジェクトを生成する
                 go.transform.position = pos;    // オブジェクトの位置を設定する
+                go.transform.SetParent(this.transform); // 生成したブロックを自分自身の子オブジェクトに設定する
                 blockWidth = go.GetComponent<SpriteRenderer>().bounds.size.x;   // いま生成したオブジェクトの高さと幅を取得する
                 blockHeight = go.GetComponent<SpriteRenderer>().bounds.size.y;
                 int a = (i % 2 == 0) ? 1 : -1;
